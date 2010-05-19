@@ -66,7 +66,7 @@ sub _run {
             my $cwd = getcwd();
             chdir $cloned_path;
             run_cmd(
-                [ $ENV{'SHIPWRIGHT_GIT'}, 'pull' ] );
+                [ $ENV{'SHIPWRIGHT_GIT'}, 'fetch', 'origin' ] );
             chdir $cwd;
         };
     }
@@ -79,17 +79,15 @@ sub _run {
     push @cmds, sub {
         my $cwd = getcwd();
         chdir $cloned_path;
-        if ( $self->version ) {
-            run_cmd(
-                [ $ENV{'SHIPWRIGHT_GIT'}, 'checkout', $self->version ] );
-        }
-        else {
+        unless( $self->version ) {
             my ($out) = run_cmd(
-                [ $ENV{'SHIPWRIGHT_GIT'}, 'log' ] );
+                [ $ENV{'SHIPWRIGHT_GIT'}, 'log', '-n', 1, 'origin' ] );
             if ( $out =~ /^commit\s+(\w+)/m ) {
                 $self->version($1);
             }
         }
+        run_cmd(
+            [ $ENV{'SHIPWRIGHT_GIT'}, 'checkout', $self->version ] );
         chdir $cwd;
         remove_tree( $path ) if -e $path;
         rcopy( $cloned_path, $path ) or confess_or_die $!;
