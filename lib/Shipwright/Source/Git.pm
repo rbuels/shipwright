@@ -81,10 +81,9 @@ sub _run {
         chdir $cloned_path;
         unless( $self->version ) {
             my ($out) = run_cmd(
-                [ $ENV{'SHIPWRIGHT_GIT'}, 'log', '-n', 1, 'origin' ] );
-            if ( $out =~ /^commit\s+(\w+)/m ) {
-                $self->version($1);
-            }
+                [ $ENV{'SHIPWRIGHT_GIT'}, 'rev-parse', 'origin' ] );
+            chomp $out;
+            $self->version($out) if $out;
         }
         run_cmd(
             [ $ENV{'SHIPWRIGHT_GIT'}, 'checkout', $self->version ] );
