@@ -66,7 +66,7 @@ sub _run {
             my $cwd = getcwd();
             chdir $cloned_path;
             run_cmd(
-                [ $ENV{'SHIPWRIGHT_GIT'}, 'fetch', 'origin' ] );
+                [ $ENV{'SHIPWRIGHT_GIT'}, 'fetch', '--tags', 'origin' ] );
             chdir $cwd;
         };
     }
