@@ -65,8 +65,8 @@ sub _run {
         @cmds = sub {
             my $cwd = getcwd();
             chdir $cloned_path;
-            run_cmd(
-                [ $ENV{'SHIPWRIGHT_GIT'}, 'fetch', '--tags', 'origin' ] );
+            run_cmd([ $ENV{'SHIPWRIGHT_GIT'}, 'fetch', '--tags', 'origin' ]);
+            run_cmd([ $ENV{'SHIPWRIGHT_GIT'}, 'fetch', '-u', 'origin' ]);
             chdir $cwd;
         };
     }
@@ -80,13 +80,20 @@ sub _run {
         my $cwd = getcwd();
         chdir $cloned_path;
         unless( $self->version ) {
-            my ($out) = run_cmd(
-                [ $ENV{'SHIPWRIGHT_GIT'}, 'rev-parse', 'origin' ] );
-            chomp $out;
-            $self->version($out) if $out;
+            $self->version('master');
+        }
+
+        my $checkout_version = $self->version;
+        {
+            my ($out) =
+                grep $_,
+                map { chomp; $_ }
+                run_cmd([ $ENV{'SHIPWRIGHT_GIT'}, 'rev-parse', 'origin/'.$self->version ], 'ignore_failure' ),
+                run_cmd([ $ENV{'SHIPWRIGHT_GIT'}, 'rev-parse', $self->version ], 'ignore_failure' );
+            $checkout_version = $out;
         }
         run_cmd(
-            [ $ENV{'SHIPWRIGHT_GIT'}, 'checkout', $self->version ] );
+            [ $ENV{'SHIPWRIGHT_GIT'}, 'checkout', $checkout_version ] );
         chdir $cwd;
         remove_tree( $path ) if -e $path;
         rcopy( $cloned_path, $path ) or confess_or_die $!;
