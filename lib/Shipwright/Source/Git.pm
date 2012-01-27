@@ -88,8 +88,9 @@ sub _run {
             my ($out) =
                 grep $_,
                 map { chomp; $_ }
-                run_cmd([ $ENV{'SHIPWRIGHT_GIT'}, 'rev-parse', 'origin/'.$self->version ], 'ignore_failure' ),
-                run_cmd([ $ENV{'SHIPWRIGHT_GIT'}, 'rev-parse', $self->version ], 'ignore_failure' );
+	        ( eval { run_cmd([ $ENV{'SHIPWRIGHT_GIT'}, 'rev-parse', 'origin/'.$self->version ] ) },
+                 eval { run_cmd([ $ENV{'SHIPWRIGHT_GIT'}, 'rev-parse', $self->version ] )}
+	        );
             $checkout_version = $out;
         }
         run_cmd(
